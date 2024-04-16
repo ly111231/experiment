@@ -1,0 +1,32 @@
+#include <nvboard.h>
+#include <Vtop.h>
+
+static Vtop *dut = new Vtop;
+
+void nvboard_bind_all_pins(Vtop* top);
+
+static void single_cycle() {
+	dut->clk = 0; dut->eval();
+  dut->clk = 1; dut->eval();
+}
+//高电平复位
+static void reset(int n) {
+  dut->rst = 1;
+  while (n -- > 0) single_cycle();
+  dut->rst = 0;
+}
+
+int main() {
+  nvboard_bind_all_pins(dut);
+  nvboard_init();
+
+  reset(10);
+
+  while(1) {
+    nvboard_update();
+    single_cycle();
+  }
+	delete dut;
+	nvboard_quit();
+	return 0;	
+}
